@@ -1,5 +1,6 @@
 <template>
   <div class="hello">
+    <button @click="logout">Logout</button>
     <h1>{{ msg }}</h1>
     <form @submit.prevent="send">
       <input type="text" v-model="myMessage"/>
@@ -40,12 +41,19 @@ export default {
     },
     remove(message){
       this.db.collection('messages').doc(message.id).delete();
+    },
+    logout(){
+      firebase.auth().signOut()
+      .then(()=> {
+        this.$router.replace({name: 'login'});
+      })
     }
   },
   created(){
     this.db = firebase.firestore();
     this.unsuscribe = this.db.collection('messages')
-    .orderBy('date', 'asc')
+    .orderBy('date', 'desc')
+    .limit(20)
     .onSnapshot(snapshot => {
       this.messages = snapshot.docs.map(doc => {
         return {
